@@ -25,9 +25,13 @@ public class User {
     private String password;
     @Field (name="nick")
     private String nick;
-    
+   
+    public User(String nom,  String password){
+        this.nom=nom;
+        this.password=password;
+    }
     public User(){
-        
+      
     }
 
     public int getId() {
@@ -69,6 +73,7 @@ public class User {
     public void setNick(String nick) {
         this.nick = nick;
     }
+
     
     
 }

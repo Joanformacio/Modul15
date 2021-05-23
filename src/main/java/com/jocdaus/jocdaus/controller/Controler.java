@@ -5,29 +5,30 @@
  */
 package com.jocdaus.jocdaus.controller;
 
-import com.jocdaus.jocdaus.models.Partida;
-import com.jocdaus.jocdaus.models.User;
-import com.jocdaus.jocdaus.repository.UserRepository;
-import java.util.List;
+import com.jocdaus.jocdaus.helpers.Ranking;
+import com.jocdaus.jocdaus.models.*;
+import com.jocdaus.jocdaus.repository.*;
+import java.util.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 
 /**
  *
  * @author Joan
  */
 @RestController
+@RequestMapping("/")
+@CrossOrigin("*")
 public class Controler {
     
     @Autowired
     private UserRepository userrepo;
+    
+    @Autowired
+    private PartiRepository prepository;
     
     @PostMapping(value="/Auth")
     public User isRegister(@RequestBody User user){
@@ -42,52 +43,110 @@ public class Controler {
         return HttpStatus.CREATED;
     }
     
-    @PutMapping(value="/player")
-    public User modifyUser(@RequestBody User user){
+    @PutMapping(value="/player/{idusuario}")
+    public String modifyUser(@PathVariable("idusuario") int idusuario ,@RequestBody User user){
         //modufiquem les dades d'un usuari
-        return null;
+        if ( userrepo.existsById(idusuario)){
+            userrepo.save(user);
+            return "modificado";
+        }else{
+            return "No se ha podido modificar el dato";
+        }
+        
+        
     }
     
      @GetMapping(value="/players")
-    public List<User> getAllPlayers(){
-        //tots els usuaris
+    public String getAllPlayers(){
+        //tots els usuaris amb el seu persentatge d'exit
+        List<StadisticsPlayer> allPlayersStadistics= new ArrayList<StadisticsPlayer>();
+        List<User> allusers= new ArrayList<User>();
+        List<Partida> allPartidas= new ArrayList<Partida>();
         
-        return userrepo.findAll();
+        allusers.addAll(userrepo.findAll());
+        for (User u: allusers){
+            
+            allPartidas=prepository.findPartidasByIdUsuari(u.getId());
+            allPlayersStadistics.add(new StadisticsPlayer(u, allPartidas));
+        }
+        return allPlayersStadistics.toString();
     }
     
+    @PostMapping (value="/players/{idusuari}/games")
+    public void createPartida(@PathVariable("idusuari") int idusuari, @RequestBody Partida partida){
+        //Crea una partida
+        
+        partida.setIdUsuari(idusuari);
+        prepository.save(partida);
+    }
+   
     
-    @GetMapping(value="/players/{idUser}/games")
-    public List<Partida> getListGamesOneplayer(@PathVariable("idUser") int idUser){
+    @GetMapping(value="/player/{idUsuari}/games")
+    public List<Partida> getListGamesOneplayer(@PathVariable("idUsuari") int idUsuari){
+       //retorna totes les partides d'un jugado
         
-        //retorna totes les partides d'un jugado
+        if(userrepo.findById(idUsuari)!=null){
+            List<Partida> partidasplayer=prepository.findPartidasByIdUsuari(idUsuari);
+              return partidasplayer;
+        }else{
+            
+            return null;
+        }
+   
         
-        return null;
     }
     
-    @DeleteMapping(value="/players/{idUser}/games")
-    public void deleteAllGamesOnePlayer(@PathVariable("idUser") int idUser){
-        
+    @DeleteMapping(value="/player/{idUsuari}/games")
+    public String deleteAllGamesOnePlayer(@PathVariable("idUsuari") int idUsuari){
         //elimina totes les partides d'un jugador
-    
-    }
-    
-    @GetMapping(value="/players/rancking")
-    public double getListAllGamesRacking(){
-        //retorna la mitja de tots el jugadors
+        if((userrepo.findById(idUsuari)!=null) && (prepository.existsPartidasByIdUsuari(idUsuari))){
+            prepository.deletePartidasByIdUsuari(idUsuari);
+              return "Eliminado todas las partidas del usuario " + idUsuari;
+        }else{
+            
+            return "El usuario " + idUsuari + ", no tiene partidas asociadas";
+        }
         
-        return 0;
+    
     }
+   
     @GetMapping(value="/player/rancking/loser")
-    public User getListAllGamesRackingLoser(){
+    public List<User> getListAllGamesRackingLoser(){
         
         //retorna el jugador que te menys punts
-        return null;
+        List<StadisticsPlayer> allPlayersStadistics= new ArrayList<StadisticsPlayer>();
+        List<User> allusers= new ArrayList<User>();
+        List<Partida> allPartidas= new ArrayList<Partida>();
+        
+        allusers.addAll(userrepo.findAll());
+        for (User u: allusers){
+            
+            allPartidas=prepository.findPartidasByIdUsuari(u.getId());
+            allPlayersStadistics.add(new StadisticsPlayer(u, allPartidas));
+        }
+        Ranking ranking= new Ranking(allPlayersStadistics);
+        
+       return ranking.getRankingUsersLosters();
+        
     }
     
    @GetMapping(value="/player/rancking/winner")
-    public User getListAllGamesRackingWinner(){
+    public List<User> getListAllGamesRackingWinner(){
+         //retorna totes les partides d'un jugado
+         
+        List<StadisticsPlayer> allPlayersStadistics= new ArrayList<StadisticsPlayer>();
+        List<User> allusers= new ArrayList<User>();
+        List<Partida> allPartidas= new ArrayList<Partida>();
         
-        //retorna totes les partides d'un jugado
-        return null;
+        allusers.addAll(userrepo.findAll());
+        for (User u: allusers){
+            
+            allPartidas=prepository.findPartidasByIdUsuari(u.getId());
+            allPlayersStadistics.add(new StadisticsPlayer(u, allPartidas));
+        }
+        Ranking ranking= new Ranking(allPlayersStadistics);
+        
+       return ranking.getRankingUsersWiners();
+        
     }
 }

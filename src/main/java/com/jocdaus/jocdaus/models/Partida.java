@@ -5,6 +5,7 @@
  */
 package com.jocdaus.jocdaus.models;
 
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -15,6 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
  */
 @Document(collection="partidas")
 public class Partida {
+   
     @Id
     private int id;
     @Field(name= "dau1")
@@ -25,6 +27,9 @@ public class Partida {
     
     @Field(name="resultat")
     private boolean resultat;
+    
+    @Field(name="idusuari")
+    private int idUsuari;
     
     public Partida(){
         
@@ -60,6 +65,26 @@ public class Partida {
 
     public void setResultat(boolean resultat) {
         this.resultat = resultat;
+    }
+
+    public int getIdUsuari() {
+        return idUsuari;
+    }
+
+    public void setIdUsuari(int idUsuari) {
+        this.idUsuari = idUsuari;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+        sb.append("Partida{id=").append(id);
+        sb.append(", dau1=").append(dau1);
+        sb.append(", dau2=").append(dau2);
+        sb.append(", resultat=").append(resultat);
+        sb.append('}');
+        return sb.toString();
     }
     
     
