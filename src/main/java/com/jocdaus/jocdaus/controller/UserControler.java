@@ -6,7 +6,7 @@
 package com.jocdaus.jocdaus.controller;
 
 import com.jocdaus.jocdaus.models.Userauth;
-import org.springframework.security.core.userdetails.User;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class UserControler {
-    @PostMapping("user")
-    public User Login (@RequestParam("user") String username, @RequestParam("password") String pwd){
-     /*  String token = getJWTToken(username);
-        Userauth user= new Userauth();
-        user.setUserth(username);
+    @PostMapping("/user")
+    public Userauth Login (@RequestParam("user") String username, @RequestParam("password") String pwd){
+       /*String token = UgetJWTToken(username);
+        User user= new User();
+        user.setUser(username);
         user.setToken(token);*/
         
         return null;
